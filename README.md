@@ -9,6 +9,7 @@
      -Java
      -Javascript
      -Typescript
+     -Python
      -Assembly
 
      Front-end tools:
