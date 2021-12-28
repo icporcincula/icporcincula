@@ -17,7 +17,7 @@
      
      Frameworks:
          Back-end:
-             - Springboot
+             - Springboot, 
          Front-end:
              - Angular
              - React.js
