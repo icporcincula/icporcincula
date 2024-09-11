@@ -1,5 +1,5 @@
 - 👋 Hi, I’m Immanuel Bart Porcincula. I am currently a software developer in the Philippines. 
-     This is my personal portfolio for projects that I will work on for 2022 and beyond.
+     This is my personal portfolio for projects that I will work on for 2024 and beyond.
      
 - 👀 Technologies that I have experienced working on include:
      
