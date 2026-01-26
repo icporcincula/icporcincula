@@ -1,53 +1,53 @@
-Hi, I’m Immanuel Bart Porcincula 👋
-I am a software developer based in the Philippines. Welcome to my personal portfolio, showcasing the projects I will work on for 2024 and beyond.
+# Hi, I’m Immanuel Bart Porcincula 👋
 
-🛠 Technologies & Tools
-Programming Languages
-C
-C++
-Java
-JavaScript
-TypeScript
-Python
-Assembly
-Front-end Tools
-HTML
-CSS/SASS
-Tailwind CSS
-Frameworks
+**Senior Systems Engineer | AI & Audio Architecture** 📍 *Manila, Philippines*
 
-Back-end:
-Spring Boot
-NestJS
-Flask
+I engineer robust backend systems and privacy-first AI infrastructure. My focus is on moving beyond "wrapping APIs" to building **event-driven microservices**, **local RAG pipelines**, and **programmatic media processing engines**.
 
-Front-end:
-Angular
-React.js
-Next.js
-Ionic
+I specialize in **Golang** for high-performance systems and **Python** for AI/Audio workflows, deploying everything as isolated, containerized services.
 
-Version Control
-Git (GUIs: Git Extensions, Sourcetree)
+---
 
-Containers
-Docker
+## 🛠 Tech Stack & Architecture
 
-Testing
-Jest
-Karma
-Jasmine
-React Testing Library
-Cypress.io
+| **Backend Systems** | **AI & Data Engineering** | **Infrastructure & DevOps** |
+| :--- | :--- | :--- |
+| ![Go](https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white) **Go (Golang)** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) **Librosa / FFmpeg** | ![Docker](https://img.shields.io/badge/Podman%20%2F%20Docker-2496ED?style=flat-square&logo=docker&logoColor=white) **Podman / Docker** |
+| ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat-square&logo=fastapi&logoColor=white) **FastAPI** | ![OpenAI](https://img.shields.io/badge/Local%20LLMs-412991?style=flat-square&logo=openai&logoColor=white) **LM Studio / Ollama** | ![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white) **Redis (Pub/Sub)** |
+| ![Postgres](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white) **PostgreSQL** | ![LangChain](https://img.shields.io/badge/RAG%20%26%20Vectors-1C3C3C?style=flat-square) **Qdrant / LangChain** | ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black) **Nginx / CI/CD** |
 
-Game Development
-Godot Engine
+---
 
-Database
-SQL (MySQL, MSSQL, PostgreSQL)
-MongoDB
-SQLite
-Prisma
+## 🚀 Featured Engineering Projects
 
-🚀 Projects
-Feel free to explore my projects to see how I've applied these technologies. For detailed information about each project, check out their individual repositories.
+### 🎙️ [**Microservices Audio Pipeline ("Mumbl")**](#)
+*A scalable, event-driven engine that transforms raw vocal "mumbles" into structured lyrics.*
+
+* **The Architecture:** Deconstructed a monolithic task into 5 isolated microservices (Orchestrator, STT, Analysis, LLM, API).
+* **Key Tech:**
+    * **Event Bus:** Redis Pub/Sub for asynchronous communication between workers.
+    * **Audio Engineering:** Custom **Librosa** implementation to detect BPM/Key and **FFmpeg** for signal processing.
+    * **Hybrid AI:** Runs **Whisper (Int8)** for transcription and connects to local LLMs for creative lyric generation.
+* **Stack:** Python 3.10, FastAPI, Celery, Podman.
+
+### 🔐 [**Vault-RAG: Air-Gapped Document Analysis**](#)
+*A privacy-first document chat system designed for sensitive data environments.*
+
+* **The Architecture:** A fully local Retrieval-Augmented Generation (RAG) pipeline. No data leaves the container network.
+* **Key Tech:**
+    * **Vector Search:** Self-hosted **Qdrant** instance for high-speed semantic retrieval.
+    * **Local Embeddings:** Uses `sentence-transformers` (all-MiniLM-L6-v2) running on CPU.
+    * **Interface:** Streamlit frontend tunneled securely via Ngrok for client demos.
+* **Stack:** LangChain, Qdrant, Streamlit, Docker Compose.
+
+---
+
+## 💼 Professional Background
+* **Senior Software Engineer (4.5 YOE):** Specializing in legacy migration and backend optimization.
+* **Legacy Experience:** Deep roots in enterprise Java (Spring Boot) and SQL optimization before transitioning to modern Cloud Native stacks.
+
+---
+
+### 📫 Connect
+* **Focus for 2026:** High-concurrency Go systems & "Black Box" AI automation.
+* [LinkedIn](#) • [Email](#)
