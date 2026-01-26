@@ -20,7 +20,7 @@ I specialize in **Golang** for high-performance systems and **Python** for AI/Au
 
 ## 🚀 Featured Engineering Projects
 
-### 🎙️ [**Microservices Audio Pipeline ("Mumbl")**](#)
+### 🎙️ [**Microservices Audio Pipeline**](#)
 *A scalable, event-driven engine that transforms raw vocal "mumbles" into structured lyrics.*
 
 * **The Architecture:** Deconstructed a monolithic task into 5 isolated microservices (Orchestrator, STT, Analysis, LLM, API).
@@ -50,4 +50,4 @@ I specialize in **Golang** for high-performance systems and **Python** for AI/Au
 
 ### 📫 Connect
 * **Focus for 2026:** High-concurrency Go systems & "Black Box" AI automation.
-* [LinkedIn](#) • [Email](#)
+* [LinkedIn](https://www.linkedin.com/in/porcinculabart/) • [Email](porcincula.developer@gmail.com)
