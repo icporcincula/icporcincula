@@ -20,16 +20,6 @@ I specialize in **Golang** for high-performance systems and **Python** for AI/Au
 
 ## Featured Engineering Projects
 
-### [**Microservices Audio Pipeline**](#)
-*A scalable, event-driven engine that transforms raw vocal "mumbles" into structured lyrics.*
-
-* **The Architecture:** Deconstructed a monolithic task into 5 isolated microservices (Orchestrator, STT, Analysis, LLM, API).
-* **Key Tech:**
-    * **Event Bus:** Redis Pub/Sub for asynchronous communication between workers.
-    * **Audio Engineering:** Custom **Librosa** implementation to detect BPM/Key and **FFmpeg** for signal processing.
-    * **Hybrid AI:** Runs **Whisper (Int8)** for transcription and connects to local LLMs for creative lyric generation.
-* **Stack:** Python 3.10, FastAPI, Celery, Podman.
-
 ### [**Sentinel-Extract: Air-Gapped PII & Document Intelligence**](#)
 *A secure, localized pipeline that de-identifies sensitive data before performing structured AI extraction.*
 
@@ -55,6 +45,16 @@ I specialize in **Golang** for high-performance systems and **Python** for AI/Au
     * **Local Embeddings:** Uses `sentence-transformers` (all-MiniLM-L6-v2) running on CPU.
     * **Interface:** Streamlit frontend tunneled securely via Ngrok for client demos.
 * **Stack:** LangChain, Qdrant, Streamlit, Docker Compose.
+
+### [**Microservices Audio Pipeline**](#)
+*A scalable, event-driven engine that transforms raw vocal "mumbles" into structured lyrics.*
+
+* **The Architecture:** Deconstructed a monolithic task into 5 isolated microservices (Orchestrator, STT, Analysis, LLM, API).
+* **Key Tech:**
+    * **Event Bus:** Redis Pub/Sub for asynchronous communication between workers.
+    * **Audio Engineering:** Custom **Librosa** implementation to detect BPM/Key and **FFmpeg** for signal processing.
+    * **Hybrid AI:** Runs **Whisper (Int8)** for transcription and connects to local LLMs for creative lyric generation.
+* **Stack:** Python 3.10, FastAPI, Celery, Podman.
 
 ---
 
