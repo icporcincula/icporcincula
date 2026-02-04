@@ -18,9 +18,9 @@ I specialize in **Golang** for high-performance systems and **Python** for AI/Au
 
 ---
 
-## 🚀 Featured Engineering Projects
+## Featured Engineering Projects
 
-### 🎙️ [**Microservices Audio Pipeline**](#)
+### [**Microservices Audio Pipeline**](#)
 *A scalable, event-driven engine that transforms raw vocal "mumbles" into structured lyrics.*
 
 * **The Architecture:** Deconstructed a monolithic task into 5 isolated microservices (Orchestrator, STT, Analysis, LLM, API).
@@ -30,7 +30,23 @@ I specialize in **Golang** for high-performance systems and **Python** for AI/Au
     * **Hybrid AI:** Runs **Whisper (Int8)** for transcription and connects to local LLMs for creative lyric generation.
 * **Stack:** Python 3.10, FastAPI, Celery, Podman.
 
-### 🔐 [**Vault-RAG: Air-Gapped Document Analysis**](#)
+### [**Sentinel-Extract: Air-Gapped PII & Document Intelligence**](#)
+*A secure, localized pipeline that de-identifies sensitive data before performing structured AI extraction.*
+
+* **The Architecture:** A "Zero-Trust" data flow where documents are sanitized at the edge. The system detects PII on the host and feeds only anonymized tokens to a local LLM, ensuring 100% data residency within the private network.
+
+* **Key Tech:**
+   * **Privacy-First De-Identification:** Integrated Microsoft Presidio to detect 12+ entity types (Names, IBANs, SSNs) using a hybrid of Spacy NER and logic-based recognizers.
+
+   * **Local Reasoning Engine:** Leverages Ollama (DeepSeek-R1 / Gemma 3) via an OpenAI-compatible bridge, providing high-reasoning extraction without cloud exposure.
+
+   * **Robust Document Ingestion:** Built with FastAPI and Tesseract OCR, allowing the system to process both digital and scanned PDFs with equal precision.
+
+   * **Docker-Bridged Connectivity:** Specialized container networking to bridge isolated microservices with host-level GPU/LLM resources.
+
+* **Stack:** Python 3.11, FastAPI, Microsoft Presidio, Ollama, Tesseract, Docker.
+
+### [**Vault-RAG: Air-Gapped Document Analysis**](#)
 *A privacy-first document chat system designed for sensitive data environments.*
 
 * **The Architecture:** A fully local Retrieval-Augmented Generation (RAG) pipeline. No data leaves the container network.
