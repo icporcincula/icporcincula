@@ -20,6 +20,12 @@ I specialize in **Golang** for high-performance systems and **Python** for AI/Au
 
 ## Featured Engineering Projects
 
+## 🤖 AI Agency (Private Project)
+
+A fully local AI software agency that builds complete projects from a Discord conversation. Describe what you want, approve the story backlog, and watch it code story by story — no cloud APIs, runs entirely on Ollama.
+
+**Python · Ollama · Redis · ChromaDB · Discord
+
 ### [**Sentinel-Extract: Air-Gapped PII & Document Intelligence**](#)
 *A secure, localized pipeline that de-identifies sensitive data before performing structured AI extraction.*
 
