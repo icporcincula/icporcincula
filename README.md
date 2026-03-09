@@ -20,7 +20,7 @@ My primary languages are **Go** for high-performance systems and **Python** for 
 
 ## Featured Projects
 
-### [Filo — Local AI Voice Receptionist for Filipino SMEs](#)
+### [Filo — Local AI Voice Receptionist for Filipino SMEs](https://github.com/icporcincula/filo-pinoy-ai-receptionist)
 
 *A fully local, privacy-first voice receptionist. No cloud APIs. No data leaving your machine.*
 
@@ -50,7 +50,7 @@ Go server :8080
 
 ---
 
-### [Sentinel-Extract — Air-Gapped PII Detection & Document Intelligence](#)
+### [Sentinel-Extract — Air-Gapped PII Detection & Document Intelligence](https://github.com/icporcincula/ai-document-analyzer)
 
 *A zero-trust document pipeline that de-identifies sensitive data before it ever reaches an LLM.*
 
@@ -66,7 +66,7 @@ The architecture treats every document as untrusted at ingestion. PII is detecte
 
 ---
 
-### [Vela — Compliance & Audit Layer for LLM Proxy Traffic](#)
+### [Vela — Compliance & Audit Layer for LLM Proxy Traffic](https://github.com/icporcincula/vela-pii-compliance)
 
 *A multi-tenant compliance layer built on top of [Eidolon](https://github.com/0M3REXE/eidolon), the open-source Rust PII redaction proxy.*
 
