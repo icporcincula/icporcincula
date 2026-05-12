@@ -1,31 +1,64 @@
-# Hi, I'm Bart Porcincula 👋
+# Hi, I'm Bart Porcincula
 
 **Senior AI Engineer · Agentic Systems & Local ML Infrastructure** &nbsp;📍 *Manila, Philippines*
 
-I build production AI systems end-to-end — from fine-tuning LLMs to deploying multi-agent pipelines entirely on private hardware. Not API wrappers: **full-stack AI engineering** across agentic orchestration, local inference, media generation, and autonomous automation infrastructure.
+Five years of experience focused on AI-augmented automation — specifically how language models and event-driven pipelines can replace processes that currently require manual effort at scale.
 
-Primary languages: **Go** for high-performance systems, **Python** for AI/ML pipelines. Everything ships containerized, observable, and without cloud lock-in.
+Primary languages: **Go** for high-performance systems, **Python** for AI/ML pipelines. Everything ships containerised, observable, and without cloud lock-in.
 
 ---
 
-## 🛠 Tech Stack
+## Stack
 
 | **AI & ML** | **Agentic Frameworks** | **Backend & Infra** |
 | :--- | :--- | :--- |
-| ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) **Ollama · Fish Speech · LatentSync** | ![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=flat-square) **LangGraph · LangChain** | ![Go](https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white) **Go (Golang)** |
-| ![HuggingFace](https://img.shields.io/badge/HuggingFace-FFD21E?style=flat-square&logo=huggingface&logoColor=black) **Unsloth · LoRA · GGUF** | ![CrewAI](https://img.shields.io/badge/CrewAI-FF6B6B?style=flat-square) **CrewAI · n8n** | ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat-square&logo=fastapi&logoColor=white) **FastAPI** |
-| ![Qdrant](https://img.shields.io/badge/Qdrant-DC143C?style=flat-square) **Qdrant · nomic-embed** | ![Presidio](https://img.shields.io/badge/Presidio%20%2F%20spaCy-412991?style=flat-square) **Presidio · spaCy** | ![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white) **Redis · PostgreSQL · SQLite** |
-| ![FFmpeg](https://img.shields.io/badge/FFmpeg-007808?style=flat-square&logo=ffmpeg&logoColor=white) **FFmpeg · Librosa · Whisper** | | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) **Docker · Nginx · CI/CD** |
+| Ollama · ComfyUI (SDXL) · Fish Speech · LatentSync | LangGraph · LangChain · CrewAI · n8n | Go · FastAPI · Docker |
+| Unsloth · LoRA · GGUF (llama.cpp) | Presidio · spaCy | Redis · PostgreSQL · Supabase · Convex |
+| FFmpeg · Whisper · SpeechBrain | Playwright · Qdrant · nomic-embed | Nginx · CI/CD |
 
 ---
 
-## Featured Projects
+## Featured Builds
 
-### Local Talking-Head UGC Pipeline — Zero Marginal Cost Per Video
+### ComfyUI AI Product Photography — Studio Relighting from One Product Photo
+
+*Client uploads a real product photo. SDXL img2img re-lights it across 6 studio presets. Consistent seed = consistent brand identity across a batch.*
+
+Built for Shopify and TikTok Shop brands that get inconsistent output from ChatGPT/Sora and can't afford per-image costs at volume.
+
+```
+Client uploads real product photo
+  │
+  ▼
+ImageResize+ (1024px, proportion-safe, multiple_of: 8)
+  │
+  ▼
+VAEEncode → KSampler (SDXL img2img, denoise: 0.35–0.72)
+  │           6 studio presets: Clean White · Dark & Moody · Warm Marble
+  │           Natural Wood · Hero Shot · Backlit Glow
+  ▼
+VAEDecode → ImageSharpen → SaveImage
+  │
+  ▼
+FastAPI web UI — upload, preset select, batch output grid
+```
+
+**Key engineering decisions:**
+- img2img (not text-to-image) — product identity preserved, lighting and background transformed
+- Per-preset denoise values — lower = more product fidelity; higher = more dramatic transformation
+- Locked seed per client brief — consistent brand identity across a full batch
+
+**Stack:** Python · ComfyUI · SDXL · FastAPI · img2img
+
+**Pricing:** Starter $49 (10 images) · Growth $120 (30 images) · Retainer $250/mo
+
+---
+
+### Local UGC Video Pipeline — Zero Marginal Cost Per Video
 
 *Full-stack local AI video generation: LLM script → voice clone → lip-sync → branded MP4. No ElevenLabs. No HeyGen. No API fees.*
 
-Built for PH SMBs that produce high-volume social content (real estate agents, insurance, Shopee sellers) and can't afford $0.10–$0.30/video at scale. The entire pipeline runs on a single consumer GPU.
+Built for PH SMBs that produce high-volume social content (real estate agents, insurance, Shopee sellers) and can't afford $0.10–$0.30/video at scale. Entire pipeline runs on a single consumer GPU.
 
 ```
 Topic brief
@@ -36,7 +69,7 @@ Ollama (qwen3.5:9b)          — script generation, local inference
   ▼
 Fish Speech :8080             — voice cloning from 20s reference clip
   │                              chunked synthesis ≤200 chars/req,
-  │                              temp=0.9 (89.2/100 eval score)
+  │                              temp=0.5 (validated optimal for consistency)
   ▼
 LatentSync (RTX 5060 Ti)     — diffusion-based lip-sync (~6.5 GB VRAM)
   │                              sdbds/LatentSync-for-Windows fork,
@@ -50,20 +83,75 @@ SyncNet QA gate              — automated lip-sync confidence check,
 ```
 
 **Key engineering decisions:**
-- Fish Speech chunked at ≤200 chars/request — prevents truncation artifacts; chunks concatenated via ffmpeg with tuned silence gaps (350ms/650ms)
+- Fish Speech chunked at ≤200 chars/request — prevents truncation artifacts; chunks concatenated via ffmpeg with tuned silence gaps
 - Whisper `tiny.pt` reused from LatentSync checkpoints for SRT generation — no extra model download
 - `_ensure_ffmpeg()` pattern — injects bundled ffmpeg into subprocess PATH, no system-level install required
-- Client profiles (`clients/{id}/profile.json`) — `--client bart` auto-fills face video, voice ref, watermark, tone, steps; one command for fully personalized output
-- Batch mode + auto SRT + QA gate all non-blocking — pipeline continues even if optional steps fail
-
-**Voice Clone Eval — automated scoring pipeline:**
-Separate eval harness runs WER (Whisper), speaker similarity (SpeechBrain ECAPA), boundary artifact detection, and prosody scoring. Iterate sweep across temperatures (0.5/0.7/0.9) automated — identified temp=0.9 as optimal without manual listening.
+- Client profiles (`clients/{id}/profile.json`) — `--client bart` auto-fills face video, voice ref, watermark, tone, steps
 
 **Stack:** Python · Ollama · Fish Speech · LatentSync · ffmpeg · Whisper · SpeechBrain
 
 ---
 
-### Podcast Specialist AI — End-to-End LLM Fine-Tuning Pipeline
+### B2B Loan Referral Pipeline — Automated Prospect-to-Lead Flow
+
+*LangGraph agent scrapes business listings, qualifies each prospect against First Circle lending criteria via local LLM, and writes hot leads to Convex.*
+
+First run: 60 scraped → 38 qualified → 5 hot leads (Bulacan/Pampanga). Finder fee ₱5,000–10,000 per approved loan.
+
+```
+Playwright scraper (port 8600)
+  │  Business listings — Google Maps + JobStreet
+  ▼
+LangGraph StateGraph
+  ├── Scrape node   — multi-source business directory extraction
+  ├── Qualify node  — Ollama qwen3.5:9b against First Circle lending criteria
+  └── Route node    — hot (score ≥ 8) → immediate referral · warm → queue
+  │
+  ▼
+Convex (self-hosted, port 3210) — b2b_loan_leads table
+```
+
+**Stack:** Python · LangGraph · Playwright · Ollama · Convex · FastAPI
+
+---
+
+### Porsynth AI Agent — Config-Driven Multi-Client Agent Service
+
+*One container, many clients. A LangGraph-based AI agent service where adding a new client = dropping a config file, no code changes.*
+
+```
+POST /v1/{client_id}/chat
+  │
+  ▼
+Agent Factory              — loads client config.yaml + system_prompt.md
+  │                           at runtime; hot-reload via POST /v1/.../reload
+  ▼
+LangGraph ReAct loop       — recursion_limit = max(75, max_iterations × 4)
+  │
+  ├── Calendly tool        — booking, event creation
+  ├── Supabase (generic)   — CRUD across any table, schema-safe
+  ├── Web search (ddgs)    — DuckDuckGo, ddgs package (not duckduckgo_search)
+  ├── n8n trigger          — fire any workflow by name
+  ├── Brevo email          — transactional send
+  ├── Telegram notify      — async alerts
+  └── Memory tool          — semantic recall via Qdrant
+  │
+  ▼
+Qdrant (semantic memory)   — nomic-embed-text embeddings, per-session store
+Redis (session history)    — 20-turn sliding window, 2h TTL
+```
+
+**Key engineering decisions:**
+- Self-registering tool modules (`@register` decorator) — adding a tool = one new file in `tools/`, zero changes to factory or registry
+- `clients/` volume-mounted, not baked into Docker image — config changes take effect without rebuild
+- Web search: `ddgs` package (v6 renamed; `duckduckgo_search` returns empty on v6+)
+- 5 hardening patterns: plan-before-execute, output validation + retries, trace, loop detection, verbosity control
+
+**Stack:** Python · FastAPI · LangGraph · LangChain · Qdrant · Redis · Ollama · Docker
+
+---
+
+### Podcast Specialist — End-to-End LLM Fine-Tuning Pipeline
 
 *5-step pipeline from raw YouTube audio to a locally-deployed GGUF model that mimics a specific podcaster's voice and style.*
 
@@ -92,102 +180,36 @@ FastAPI Chat UI :8660          — streaming, 5 demo chips, SSE events
 ```
 
 **Key engineering decisions:**
-- Qwen3.5-4B tokenizer hash differs from 9B-Instruct — patched `convert_hf_to_gguf.py` with correct hash; tokenizer restored from HF cache before conversion
+- Qwen3.5-4B tokenizer hash differs from 9B-Instruct — patched `convert_hf_to_gguf.py` with correct hash
 - Thinking mode causes infinite `<think>` loops on Qwen3.5 — disabled via Modelfile template pre-fill + stop tokens
-- `collect_channel.py` bulk scraper — pull entire YouTube channel via yt-dlp; dataset ready to expand to 20–30 more episodes
+- `collect_channel.py` bulk scraper — pull entire YouTube channel; dataset expandable to 20–30+ episodes
 
 **Stack:** Python · Unsloth · LoRA · llama.cpp · Ollama · FastAPI · Qwen3.5-4B
 
 ---
 
-### Porsynth AI Agent — Config-Driven Multi-Client Agent Service
+## Other Builds
 
-*One container, many clients. A LangGraph-based AI agent service where adding a new client = dropping a config file, no code changes.*
-
-Built to replace a rigid bespoke agent with a reusable, hot-reloadable agentic layer that any client configuration can plug into.
-
-```
-POST /v1/{client_id}/chat
-  │
-  ▼
-Agent Factory              — loads client config.yaml + system_prompt.md
-  │                           at runtime; hot-reload via POST /v1/.../reload
-  ▼
-LangGraph ReAct loop       — recursion_limit = max(75, max_iterations × 4)
-  │
-  ├── Calendly tool        — booking, event creation
-  ├── Supabase (generic)   — CRUD across any table, schema-safe
-  ├── Web search (ddgs)    — DuckDuckGo, ddgs package (not duckduckgo_search)
-  ├── n8n trigger          — fire any workflow by name
-  ├── Brevo email          — transactional send
-  ├── Telegram notify      — async alerts
-  ├── Carousell search     — PH listings lookup
-  └── Memory tool          — semantic recall via Qdrant
-  │
-  ▼
-Qdrant (semantic memory)   — nomic-embed-text embeddings, per-session store
-Redis (session history)    — 20-turn sliding window, 2h TTL
-```
-
-**Key engineering decisions:**
-- Self-registering tool modules (`@register` decorator) — adding a tool = one new file in `tools/`, zero changes to factory or registry
-- `clients/` directory volume-mounted, not baked into Docker image — config changes take effect without rebuild
-- Web search: `ddgs` package (v6 renamed; `duckduckgo_search` returns empty on v6+)
-- LangGraph answer capture: `on_chain_end` only — stream buffer garbles mid-reasoning chunks
-- Memory: Qdrant (semantic) + Redis (sessions) + Ollama embeddings; LM Studio embedding endpoint rejected LangChain SDK
-
-**Stack:** Python · FastAPI · LangGraph · LangChain · Qdrant · Redis · Ollama · Docker
+| Project | Description | Stack | Status | Link |
+| :--- | :--- | :--- | :--- | :--- |
+| **n8n Lead Engine** | Autonomous B2B/RE/Reddit lead gen pipelines — scrape → qualify → Supabase. Daily + 6h cadence, runs unattended | n8n · Playwright · FastAPI · Supabase · Ollama | Live | — |
+| **LangGraph Lead Intelligence Agent** | Benchmarked against CrewAI (1,178s) and baseline (639s). Result: 5/5 leads found in 128.5s with 4 tool calls | LangGraph · FastAPI · Playwright · Supabase | Built | — |
+| **Reddit Prospect Monitor** | 6 subreddits · commercial intent signals · AI pain point extraction and personalised outreach drafts delivered to Supabase daily | Reddit API · n8n · Supabase | Live | — |
+| **AI Appointment Booking Agent** | CrewAI crew (Lead Scout, Qualifier, Booking Drafter) qualifies an inbound lead and generates a personalised booking message. ~60s end-to-end | CrewAI · LangGraph · Calendly | Built | — |
+| **GEO / AI Citation Auditing** | Playwright query runner: 30 prompts across Perplexity + Google AI Overviews → structured gap report. Built to answer: does this site exist to AI engines? | Playwright · Python · Perplexity | Research | — |
+| **[Filo — AI Voice Receptionist](https://github.com/icporcincula/filo-pinoy-ai-receptionist)** | Fully local voice receptionist for PH SMEs: browser mic → VAD → Faster-Whisper STT → Ollama LLM → Kokoro TTS. No cloud APIs | Go · Faster-Whisper · Ollama · Kokoro · Redis · Docker | Built | [GitHub](https://github.com/icporcincula/filo-pinoy-ai-receptionist) |
+| **[Sentinel-Extract](https://github.com/icporcincula/ai-document-analyzer)** | Air-gapped PII detection & document intelligence. Hybrid NER (Presidio + spaCy), local LLM reasoning, OCR-native ingestion | Python · Presidio · Ollama · FastAPI · Tesseract | Built | [GitHub](https://github.com/icporcincula/ai-document-analyzer) |
+| **[Vela](https://github.com/icporcincula/vela-pii-compliance)** | Compliance & audit layer — per-tenant rules, immutable audit log, live rule editor | Go · React · SQLite · Docker | Built | [GitHub](https://github.com/icporcincula/vela-pii-compliance) |
+| **[Portfolio Recorder](https://github.com/icporcincula/portfolio-recorder)** | Playwright-based automated portfolio video pipeline: screen capture → narration → voice clone → ffmpeg render | Python · Playwright · Fish Speech · ffmpeg | Built | [GitHub](https://github.com/icporcincula/portfolio-recorder) |
 
 ---
 
-### [Filo — Local AI Voice Receptionist for Filipino SMEs](https://github.com/icporcincula/filo-pinoy-ai-receptionist)
+## Background
 
-*A fully local, privacy-first voice receptionist. No cloud APIs. No data leaving your machine.*
+Senior AI Engineer (5 YOE) specialising in agentic systems, local ML infrastructure, and AI-driven automation. Roots in enterprise Java (Spring Boot) and SQL optimisation, then cloud-native Go/Python backends, now focused on end-to-end AI pipelines — from LLM fine-tuning and voice cloning to multi-agent orchestration and autonomous lead generation systems.
 
-Built for Philippine SMEs that need an always-on front desk without subscription fees or data exposure. Filo handles real-time voice conversations end-to-end: browser microphone → VAD → STT → LLM → TTS → browser audio, all on your own hardware.
-
-```
-Browser mic (16kHz PCM)
-  │  WebSocket /ws
-  ▼
-Go server :8080
-  ├── VAD        energy-based, 1200ms silence = end of utterance
-  ├── STT   →   Speaches :8000   (Faster-Whisper, CPU or GPU)
-  ├── LLM   →   Ollama   :11434  (llama3.1:8b or any local model)
-  ├── TTS   →   Kokoro   :5000   (kokoro-onnx)
-  └── History → Redis    :6379   (2h TTL, 20-turn window)
-```
-
-**Key engineering decisions:**
-- Echo cancellation + mic muting during TTS playback to prevent false VAD triggers
-- WebSocket keep-alive (20s ping/pong) to survive long silences between utterances
-- `WHISPER__MODEL_TTL: 0` keeps the STT model hot — eliminates 4–5s cold starts
-- Conversation history windowed at 20 turns with 2h Redis TTL per session
-
-**Stack:** Go · Faster-Whisper · Ollama · Kokoro ONNX · Redis · Docker
+Everything ships on private infrastructure: no cloud lock-in, no third-party data exposure, zero marginal cost at scale.
 
 ---
 
-## 💼 Background
-
-Senior AI Engineer (5 YOE) specializing in agentic systems, local ML infrastructure, and AI-driven automation. Roots in enterprise Java (Spring Boot) and SQL optimization, then cloud-native Go/Python backends, now focused on **end-to-end AI pipelines** — from LLM fine-tuning and voice cloning to multi-agent orchestration and autonomous lead generation systems.
-
-Everything I ship runs on private infrastructure: no cloud lock-in, no third-party data exposure, zero marginal cost at scale.
-
----
-
-## Other Projects
-
-| Project | Description | Stack | Link |
-| :--- | :--- | :--- | :--- |
-| **n8n Lead Engine** | Autonomous B2B/RE/Reddit lead generation pipelines — scrape → qualify → Supabase. Orchestrator/subworkflow architecture, 5 active pipelines | n8n · Playwright · FastAPI · Supabase · Ollama | — |
-| **Voice Clone Eval** | Automated scoring harness for Fish Speech output: WER, speaker similarity, boundary artifact detection, prosody. Iterate sweep across hyperparams without manual listening | Python · Whisper · SpeechBrain · Librosa | — |
-| **CrewAI Demos** | 5 multi-agent crews (RE Benchmark, Job Eval, Recruiter, AI Booking, Survey Report) with structured SSE streaming UI | Python · CrewAI · FastAPI | — |
-| **House Tour Pipeline** | Automated real estate video generation: property photos → AI description → script → TTS → Ken Burns + DepthFlow parallax video | Python · DepthFlow · ffmpeg · Fish Speech · Ollama | — |
-| **Portfolio Recorder** | Playwright-based automated portfolio video pipeline: screen capture → narration → voice clone → ffmpeg render | Python · Playwright · Fish Speech · ffmpeg | [GitHub](https://github.com/icporcincula/portfolio-recorder) |
-| **[Sentinel-Extract](https://github.com/icporcincula/ai-document-analyzer)** | Air-gapped PII detection & document intelligence. Hybrid NER (Presidio + spaCy), local LLM reasoning, OCR-native ingestion | Python · Presidio · Ollama · FastAPI · Tesseract | [GitHub](https://github.com/icporcincula/ai-document-analyzer) |
-| **[Vela](https://github.com/icporcincula/vela-pii-compliance)** | Compliance & audit layer on top of Eidolon (Rust PII proxy) — per-tenant rules, immutable audit log, live rule editor | Go · React · SQLite · Docker | [GitHub](https://github.com/icporcincula/vela-pii-compliance) |
-
----
-
-📫 [LinkedIn](https://www.linkedin.com/in/porcinculabart/) · [Email](mailto:porcincula.developer@gmail.com)
+📫 [LinkedIn](https://www.linkedin.com/in/porcinculabart/) · [Email](mailto:porcincula.developer@gmail.com) · [porsync.com](https://www.porsync.com)
