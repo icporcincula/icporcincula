@@ -1,10 +1,10 @@
 # Hi, I'm Bart Porcincula
 
-**Senior AI Engineer · Agentic Systems & Local ML Infrastructure** &nbsp;📍 *Manila, Philippines*
+**Founder of [Porsync](https://www.porsync.com) · AI Automation Engines for Domain Experts** &nbsp;📍 *Manila, Philippines*
 
-Five years of experience focused on AI-augmented automation — specifically how language models and event-driven pipelines can replace processes that currently require manual effort at scale.
+I build custom AI automation systems — lead intelligence pipelines, voice agents, agentic web infrastructure (WebMCP), and AEO / answer-engine optimisation. Five years across agentic systems, local ML infrastructure, and event-driven backends.
 
-Primary languages: **Go** for high-performance systems, **Python** for AI/ML pipelines. Everything ships containerised, observable, and without cloud lock-in.
+At [Porsync](https://www.porsync.com) I work with operators in roofing, solar, real estate, and B2B services who need AI that actually moves revenue — not dashboards. Primary languages: **Go** for high-performance systems, **Python** for AI/ML pipelines. Everything ships containerised, observable, and without cloud lock-in.
 
 ---
 
@@ -115,9 +115,9 @@ Convex (self-hosted, port 3210) — b2b_loan_leads table
 
 ---
 
-### Porsynth AI Agent — Config-Driven Multi-Client Agent Service
+### Porsync AI Agent — Config-Driven Multi-Client Agent Service
 
-*One container, many clients. A LangGraph-based AI agent service where adding a new client = dropping a config file, no code changes.*
+*One container, many clients. A LangGraph-based AI agent service where adding a new client = dropping a config file, no code changes. Powers the agent surface on [porsync.com](https://www.porsync.com) and white-labelled deployments.*
 
 ```
 POST /v1/{client_id}/chat
@@ -206,9 +206,11 @@ FastAPI Chat UI :8660          — streaming, 5 demo chips, SSE events
 
 ## Background
 
-Senior AI Engineer (5 YOE) specialising in agentic systems, local ML infrastructure, and AI-driven automation. Roots in enterprise Java (Spring Boot) and SQL optimisation, then cloud-native Go/Python backends, now focused on end-to-end AI pipelines — from LLM fine-tuning and voice cloning to multi-agent orchestration and autonomous lead generation systems.
+Founder of **[Porsync](https://www.porsync.com)** — an AI automation studio that turns domain expertise into recurring systems. 5 YOE across agentic systems, local ML infrastructure, and AI-driven automation. Roots in enterprise Java (Spring Boot) and SQL optimisation, then cloud-native Go/Python backends, now focused on end-to-end AI pipelines — from LLM fine-tuning and voice cloning to multi-agent orchestration, agentic web (WebMCP), and autonomous lead generation systems.
 
 Everything ships on private infrastructure: no cloud lock-in, no third-party data exposure, zero marginal cost at scale.
+
+**Working with Porsync:** [porsync.com/about](https://www.porsync.com/about) · [Services](https://www.porsync.com/services) · [Case Studies](https://www.porsync.com/case-studies)
 
 ---
 
