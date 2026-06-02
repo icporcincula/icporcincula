@@ -1,8 +1,6 @@
-# Portfolio Summary
+# Bart Porcincula — Software Engineer · AI Systems
 
-Building custom AI automation systems for domain experts — agentic pipelines, private inference infrastructure, and observable backend services. Focus on eliminating cloud lock-in and keeping sensitive data on-premise.
-
-At [Porsync](https://www.porsync.com) I work with operators who need AI that moves revenue — not dashboards. Primary languages: **Go** for high-performance systems, **Python** for AI/ML pipelines. Everything ships containerised, observable, and without cloud lock-in.
+Building custom AI automation systems — agentic pipelines, private inference infrastructure, and observable backend services. Focus on eliminating cloud lock-in and keeping sensitive data on-premise. Primary languages: **Go** for high-performance systems, **Python** for AI/ML pipelines.
 
 ---
 
@@ -206,8 +204,4 @@ FastAPI Chat UI :8660          — streaming, 5 demo chips, SSE events
 
 Everything ships on private infrastructure: no cloud lock-in, no third-party data exposure, zero marginal cost at scale.
 
-**Working with Porsync:** [porsync.com/about](https://www.porsync.com/about) · [Services](https://www.porsync.com/services) · [Case Studies](https://www.porsync.com/case-studies)
-
----
-
-📫 [connect@porsync.com](mailto:connect@porsync.com)
+📫 [porcincula.developer@gmail.com](mailto:porcincula.developer@gmail.com)
