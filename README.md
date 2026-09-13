@@ -16,6 +16,44 @@ Building custom AI automation systems — agentic pipelines, private inference i
 
 ## Featured Builds
 
+### Data Lakehouse — Finding and Fixing Silent Data Loss in a Production Pipeline
+
+*Opened a live lead-generation pipeline (~6,400 PH businesses scraped twice daily) with a formal data-quality audit — found two critical defects that had never raised an error, failed a run, or fired an alert. Rebuilt as a Fabric-shaped medallion lakehouse so the same class of bug can't recur silently.*
+
+Full write-up: [porsync.com/case-studies/silent-data-loss-lead-pipeline](https://www.porsync.com/case-studies/silent-data-loss-lead-pipeline)
+
+```
+Google Maps — 10 categories × 28 PH cities, 2×/day
+  │
+  ▼
+n8n scrape → LLM qualify (LM Studio, Gemma) → Supabase        bronze (raw truth)
+  │
+  ▼
+Delta Lake export (delta-rs, no JVM)                          contract-validated,
+  │                                                            quarantine-rate gate
+  ▼
+DuckDB warehouse → dbt star schema                             silver/gold
+  │                  SCD-2 business dim, event-grain fact
+  ▼
+Dagster — scheduled + freshness-sensor armed                   governed metrics,
+                    4-tier / 197+ assertion suite               reconciled vs. source
+```
+
+**What the audit found:**
+- A dead `place_id` dedup key (scraper never emitted it) silently fell back to matching on shared website domain — **545 distinct businesses wrongly collapsed together**, 8.5% of the table, on every run
+- A `max_tokens: 300` config on one scraper truncated 57.8% of its enrichment output mid-JSON — caught by a generic parse-error handler and stored as "nothing found," byte-for-byte indistinguishable from a real empty result
+- A placeholder cross join (`on 1 = 1`) in the dbt star schema fanned a fact table out **28×** — `dbt build` stayed green because schema tests checked `not_null`/`accepted_values`, not grain uniqueness
+
+**Key engineering decisions:**
+- A written data contract (`contracts/generate.py --check` in CI) as the one source of truth, replacing five drifting definitions of "qualified lead"
+- Quarantine-rate gate instead of a silent drop — failing rows go to a quarantine table with a reason, threshold pinned to a real historical rate so a gate that could never fire looks identical to one that works
+- Caught a remediation script's copy-paste bug in review, before it ran — a guard load-bearing in the original context did nothing once cloned into a new one
+- Found a `RUNNING` schedule flag that described intent, not a working daemon — fixed with an explicit workspace, liveness-checked startup, and a regression test asserting a tick actually fired in the last 25 hours
+
+**Stack:** n8n · Supabase (Postgres) · Delta Lake (delta-rs) · DuckDB · dbt · Dagster
+
+---
+
 ### ComfyUI AI Product Photography — Studio Relighting from One Product Photo
 
 *Client uploads a real product photo. SDXL img2img re-lights it across 6 studio presets. Consistent seed = consistent brand identity across a batch.*
@@ -193,7 +231,7 @@ FastAPI Chat UI :8660          — streaming, 5 demo chips, SSE events
 | **GEO / AI Citation Auditing** | Playwright query runner: 30 prompts across Perplexity + Google AI Overviews → structured gap report | Playwright · Python · Perplexity | Research | — |
 | **[Filo — AI Voice Receptionist](https://github.com/icporcincula/filo-pinoy-ai-receptionist)** | Fully local voice receptionist: browser mic → VAD → Faster-Whisper STT → Ollama LLM → Kokoro TTS. No cloud APIs | Go · Faster-Whisper · Ollama · Kokoro · Redis · Docker | Built | [GitHub](https://github.com/icporcincula/filo-pinoy-ai-receptionist) |
 | **[Sentinel-Extract](https://github.com/icporcincula/ai-document-analyzer)** | Air-gapped PII detection & document intelligence. Hybrid NER (Presidio + spaCy), local LLM reasoning, OCR-native ingestion | Python · Presidio · Ollama · FastAPI · Tesseract | Built | [GitHub](https://github.com/icporcincula/ai-document-analyzer) |
-| **[Vela](https://github.com/icporcincula/vela-pii-compliance)** | Compliance & audit layer — per-tenant rules, immutable audit log, live rule editor | Go · React · SQLite · Docker | Built | [GitHub](https://github.com/icporcincula/vela-pii-compliance) |
+| **[Vela](https://github.com/icporcincula/vela-pii-compliance)** | Compliance & audit layer sitting on top of [Eidolon](https://github.com/0M3REXE/eidolon) (Rust PII-redaction proxy) — async audit webhooks off the hot path, per-tenant rules, immutable audit log, compliance export | Go · React · SQLite · Docker | Built | [GitHub](https://github.com/icporcincula/vela-pii-compliance) |
 | **[Portfolio Recorder](https://github.com/icporcincula/portfolio-recorder)** | Playwright-based automated portfolio video pipeline: screen capture → narration → voice clone → ffmpeg render | Python · Playwright · Fish Speech · ffmpeg | Built | [GitHub](https://github.com/icporcincula/portfolio-recorder) |
 
 ---
