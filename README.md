@@ -1,245 +1,106 @@
-# Bart Porcincula — Software Engineer · AI Systems
+# Bart Porcincula — Senior AI Engineer
 
-Building custom AI automation systems — agentic pipelines, private inference infrastructure, and observable backend services. Focus on eliminating cloud lock-in and keeping sensitive data on-premise. Primary languages: **Go** for high-performance systems, **Python** for AI/ML pipelines.
+LLM agents, evaluation and backend systems. **TypeScript · Python · Go.** Based in the Philippines, open to relocation to **Ireland / UK**.
 
----
+I build production agent systems and the evaluation tooling that shows whether a change actually changed anything. I use a model only where the output is language or a judgement call and keep every other decision deterministic. I measure before I claim, and I correct my own design records when the data proves them wrong.
 
-## Stack
-
-| **AI & ML** | **Agentic Frameworks** | **Backend & Infra** |
-| :--- | :--- | :--- |
-| Ollama · ComfyUI (SDXL) · Fish Speech · LatentSync | LangGraph · LangChain · CrewAI · n8n | Go · FastAPI · Docker |
-| Unsloth · LoRA · GGUF (llama.cpp) | Presidio · spaCy | Redis · PostgreSQL · Supabase · Convex |
-| FFmpeg · Whisper · SpeechBrain | Playwright · Qdrant · nomic-embed | Nginx · CI/CD |
+📫 [porcincula.developer@gmail.com](mailto:porcincula.developer@gmail.com) · 🌐 [porsync.com](https://www.porsync.com)
 
 ---
 
-## Featured Builds
+## Now
 
-### Data Lakehouse — Finding and Fixing Silent Data Loss in a Production Pipeline
+**Senior AI Engineer, TOA Global** (June 2026 – present). Building agents for a production multi-agent recruitment-workflow platform on Azure (TypeScript, Claude, Service Bus, Azure SQL, Cosmos DB). The platform is a finalist in the **Australian AI Awards 2026** (AI Innovator – Human Resources). That work is closed-source; the projects below are my own.
 
-*Opened a live lead-generation pipeline (~6,400 PH businesses scraped twice daily) with a formal data-quality audit — found two critical defects that had never raised an error, failed a run, or fired an alert. Rebuilt as a Fabric-shaped medallion lakehouse so the same class of bug can't recur silently.*
+---
 
-Full write-up: [porsync.com/case-studies/silent-data-loss-lead-pipeline](https://www.porsync.com/case-studies/silent-data-loss-lead-pipeline)
+## Featured work
+
+### slm-mesh: can fine-tuned small models replace a 4B generalist in a live pipeline?
+
+*A controlled study on a real lead-qualification workflow: a prompted 4B generalist against a mesh of fine-tuned specialists (Qwen3 0.6B/1.7B LoRAs and a ModernBERT encoder), both running locally on one 16 GB consumer GPU.*
+
+**Result: training bought reliability and efficiency, not accuracy.**
+
+- **12× faster:** 828 s against 9,925 s per 1,000 leads, with all four specialists resident in **5.5 GB VRAM** (served as LoRA hot-swap on a shared Q4_K_M base; an adapter swap costs 31 ms)
+- **Deterministic:** across seeded repeats not one score, tier or decision changed, while the teacher's reject recall swung 0.13 between identical runs
+- **Schema defect class removed:** GBNF grammar generated from the data contract gives 100% schema validity and zero alias-map dependency across 6,378 records
+- **Accuracy was a tie, and the report says so.** The negative-class gate failed once scored on balanced accuracy. Both models' reject precision sits at the base rate, because the students inherited the teacher's bias from its labels. The labels set the ceiling, not the model size.
+
+**How it's kept honest:**
+- Pass/fail thresholds locked in the plan before any training ran
+- Human-labelled gold set drawn only from the temporally latest split; the teacher is never treated as ground truth (ADR)
+- Temporal, entity-deduplicated splits so no business crosses a train/test boundary
+- Every number in the write-up is re-derived by a check script from the results database, and the check fails on any unmarked metric
+- Shadow-mode A/B against production before any traffic flip; production untouched throughout
+
+**Stack:** Unsloth / TRL SFT · LoRA · ModernBERT · llama.cpp (CUDA, multi-LoRA) · GGUF · GBNF · DuckDB · dbt · n8n
+
+---
+
+### Data lakehouse: finding and fixing silent data loss in a production pipeline
+
+*Opened a live lead-generation pipeline (~6,400 businesses scraped twice daily) with a formal data-quality audit. It found defects that had never raised an error, failed a run or fired an alert. Rebuilt as a Fabric-shaped medallion lakehouse so the same class of bug can't recur silently.*
+
+Write-up: [porsync.com/case-studies/silent-data-loss-lead-pipeline](https://www.porsync.com/case-studies/silent-data-loss-lead-pipeline)
 
 ```
 Google Maps — 10 categories × 28 PH cities, 2×/day
   │
   ▼
-n8n scrape → LLM qualify (LM Studio, Gemma) → Supabase        bronze (raw truth)
+n8n scrape → LLM qualify (local Gemma) → Postgres               bronze (raw truth)
   │
   ▼
-Delta Lake export (delta-rs, no JVM)                          contract-validated,
-  │                                                            quarantine-rate gate
+Delta Lake export (delta-rs, no JVM)                            contract-validated,
+  │                                                              quarantine-rate gate
   ▼
-DuckDB warehouse → dbt star schema                             silver/gold
+DuckDB warehouse → dbt star schema                              silver / gold
   │                  SCD-2 business dim, event-grain fact
   ▼
-Dagster — scheduled + freshness-sensor armed                   governed metrics,
-                    4-tier / 197+ assertion suite               reconciled vs. source
+Dagster — scheduled + freshness sensor, live daemon             reconciled vs. source
 ```
 
 **What the audit found:**
-- A dead `place_id` dedup key (scraper never emitted it) silently fell back to matching on shared website domain — **545 distinct businesses wrongly collapsed together**, 8.5% of the table, on every run
-- A `max_tokens: 300` config on one scraper truncated 57.8% of its enrichment output mid-JSON — caught by a generic parse-error handler and stored as "nothing found," byte-for-byte indistinguishable from a real empty result
-- A placeholder cross join (`on 1 = 1`) in the dbt star schema fanned a fact table out **28×** — `dbt build` stayed green because schema tests checked `not_null`/`accepted_values`, not grain uniqueness
+- A dedup key the scraper never emitted silently fell back to matching on website domain: **545 distinct businesses wrongly merged** (8.5% of the table) on every run
+- A `max_tokens: 300` setting truncated **57.8%** of one scraper's enrichment mid-JSON, stored as "nothing found" and indistinguishable from a real empty result
+- A placeholder cross join fanned a fact table out **28×** while `dbt build` stayed green, because the tests checked nulls and enums, not grain
+- The silver contract, not the data, was wrong: it understated "hot" leads by 63% because the scoring rules lived in five unlinked places
 
-**Key engineering decisions:**
-- A written data contract (`contracts/generate.py --check` in CI) as the one source of truth, replacing five drifting definitions of "qualified lead"
-- Quarantine-rate gate instead of a silent drop — failing rows go to a quarantine table with a reason, threshold pinned to a real historical rate so a gate that could never fire looks identical to one that works
-- Caught a remediation script's copy-paste bug in review, before it ran — a guard load-bearing in the original context did nothing once cloned into a new one
-- Found a `RUNNING` schedule flag that described intent, not a working daemon — fixed with an explicit workspace, liveness-checked startup, and a regression test asserting a tick actually fired in the last 25 hours
+**Key decisions:**
+- One data contract as the source of truth; every consumer is generated from it and `generate.py --check` gates CI
+- A quarantine-rate gate instead of silent drops, with its ceiling pinned to a real historical rate so a gate that can't fire doesn't pass for one that works
+- Scoring provenance (`scored_by_model`, `prompt_version`, `rules_version`) on every event
+- Caught a `RUNNING` schedule flag that described intent rather than a working daemon; the fix includes a test that a tick actually fired
 
-**Stack:** n8n · Supabase (Postgres) · Delta Lake (delta-rs) · DuckDB · dbt · Dagster
-
----
-
-### ComfyUI AI Product Photography — Studio Relighting from One Product Photo
-
-*Client uploads a real product photo. SDXL img2img re-lights it across 6 studio presets. Consistent seed = consistent brand identity across a batch.*
-
-Built for Shopify and TikTok Shop brands that need consistent output at volume.
-
-```
-Client uploads real product photo
-  │
-  ▼
-ImageResize+ (1024px, proportion-safe, multiple_of: 8)
-  │
-  ▼
-VAEEncode → KSampler (SDXL img2img, denoise: 0.35–0.72)
-  │           6 studio presets: Clean White · Dark & Moody · Warm Marble
-  │           Natural Wood · Hero Shot · Backlit Glow
-  ▼
-VAEDecode → ImageSharpen → SaveImage
-  │
-  ▼
-FastAPI web UI — upload, preset select, batch output grid
-```
-
-**Key engineering decisions:**
-- img2img (not text-to-image) — product identity preserved, lighting and background transformed
-- Per-preset denoise values — lower = more product fidelity; higher = more dramatic transformation
-- Locked seed per client brief — consistent brand identity across a full batch
-
-**Stack:** Python · ComfyUI · SDXL · FastAPI · img2img
-
-**Pricing:** Starter $49 (10 images) · Growth $120 (30 images) · Retainer $250/mo
+**Stack:** n8n · Postgres (Supabase) · Delta Lake (delta-rs) · DuckDB · dbt · Dagster · GitHub Actions
 
 ---
 
-### Local UGC Video Pipeline — Zero Marginal Cost Per Video
+## Stack
 
-*Full-stack local AI video generation: LLM script → voice clone → lip-sync → branded MP4. No ElevenLabs. No HeyGen. No API fees.*
-
-Built for SMBs producing high-volume social content. Entire pipeline runs on a single consumer GPU.
-
-```
-Topic brief
-  │
-  ▼
-Ollama (qwen3.5:9b)          — script generation, local inference
-  │
-  ▼
-Fish Speech :8080             — voice cloning from 20s reference clip
-  │                              chunked synthesis ≤200 chars/req,
-  │                              temp=0.5 (validated optimal for consistency)
-  ▼
-LatentSync (RTX 5060 Ti)     — diffusion-based lip-sync (~6.5 GB VRAM)
-  │                              sdbds/LatentSync-for-Windows fork,
-  │                              torch 2.11.0+cu128 (Blackwell sm_120)
-  ▼
-ffmpeg postprocess            — scale/pad 9:16, caption burn-in (libass),
-  │                              watermark overlay, CRF tuning
-  ▼
-SyncNet QA gate              — automated lip-sync confidence check,
-                               non-blocking (warn + continue on low score)
-```
-
-**Key engineering decisions:**
-- Fish Speech chunked at ≤200 chars/request — prevents truncation artifacts; chunks concatenated via ffmpeg with tuned silence gaps
-- Whisper `tiny.pt` reused from LatentSync checkpoints for SRT generation — no extra model download
-- `_ensure_ffmpeg()` pattern — injects bundled ffmpeg into subprocess PATH, no system-level install required
-- Client profiles (`clients/{id}/profile.json`) — `--client id` auto-fills face video, voice ref, watermark, tone, steps
-
-**Stack:** Python · Ollama · Fish Speech · LatentSync · ffmpeg · Whisper · SpeechBrain
+| **LLM & agents** | **Fine-tuning & serving** | **Backend & data** |
+| :--- | :--- | :--- |
+| Claude API · tool-calling loops · streaming · prompt caching | LoRA · TRL SFT · Unsloth · ModernBERT | TypeScript / Node · Python (FastAPI) · Go |
+| LangGraph · MCP · prompt-injection containment | GGUF · llama.cpp (CUDA) · Ollama · LM Studio | Azure Functions · Service Bus · Azure SQL · Cosmos DB |
+| LLM evaluation: reference sets, control arms, noise floors | Presidio PII de-identification | Postgres · DuckDB · dbt · Dagster · Delta Lake · Redis · Qdrant |
 
 ---
 
-### Lead Qualification Pipeline — Directory-to-CRM Prospect Flow
+## Earlier projects
 
-*LangGraph agent scrapes business listings, scores each prospect against a weighted ICP rubric via local LLM, and routes qualified leads to a self-hosted CRM.*
-
-First run: 60 scraped → 38 qualified → 5 hot leads. Architecture ports to any directory-sourced sales motion.
-
-```
-Playwright scraper (port 8600)
-  │  Business listings — Google Maps + directory sources
-  ▼
-LangGraph StateGraph
-  ├── Scrape node   — multi-source business directory extraction
-  ├── Qualify node  — Ollama qwen3.5:9b against weighted ICP rubric
-  └── Route node    — hot (score ≥ 8) → immediate handoff · warm → queue
-  │
-  ▼
-Convex (self-hosted, port 3210) — leads table
-```
-
-**Stack:** Python · LangGraph · Playwright · Ollama · Convex · FastAPI
-
----
-
-### Porsync AI Agent — Config-Driven Multi-Client Agent Service
-
-*One container, many clients. A LangGraph-based AI agent service where adding a new client = dropping a config file, no code changes. Powers the agent surface on [porsync.com](https://www.porsync.com) and white-labelled deployments.*
-
-```
-POST /v1/{client_id}/chat
-  │
-  ▼
-Agent Factory              — loads client config.yaml + system_prompt.md
-  │                           at runtime; hot-reload via POST /v1/.../reload
-  ▼
-LangGraph ReAct loop       — recursion_limit = max(75, max_iterations × 4)
-  │
-  ├── Calendly tool        — booking, event creation
-  ├── Supabase (generic)   — CRUD across any table, schema-safe
-  ├── Web search (ddgs)    — DuckDuckGo, ddgs package (not duckduckgo_search)
-  ├── n8n trigger          — fire any workflow by name
-  ├── Brevo email          — transactional send
-  ├── Telegram notify      — async alerts
-  └── Memory tool          — semantic recall via Qdrant
-  │
-  ▼
-Qdrant (semantic memory)   — nomic-embed-text embeddings, per-session store
-Redis (session history)    — 20-turn sliding window, 2h TTL
-```
-
-**Key engineering decisions:**
-- Self-registering tool modules (`@register` decorator) — adding a tool = one new file in `tools/`, zero changes to factory or registry
-- `clients/` volume-mounted, not baked into Docker image — config changes take effect without rebuild
-- Web search: `ddgs` package (v6 renamed; `duckduckgo_search` returns empty on v6+)
-- 5 hardening patterns: plan-before-execute, output validation + retries, trace, loop detection, verbosity control
-
-**Stack:** Python · FastAPI · LangGraph · LangChain · Qdrant · Redis · Ollama · Docker
-
----
-
-### Podcast Specialist — End-to-End LLM Fine-Tuning Pipeline
-
-*5-step pipeline from raw YouTube audio to a locally-deployed GGUF model that mimics a specific podcaster's voice and style.*
-
-```
-YouTube channel
-  │  yt-dlp + youtube-transcript-api
-  ▼
-Raw transcripts (68K chars, 2 podcasts)
-  │  prepare_dataset.py → JSONL Q&A pairs
-  ▼
-291 training examples
-  │  Unsloth LoRA fine-tuning (Qwen3.5-4B, bf16)
-  ▼
-LoRA adapter (~85 MB)         — 3 epochs, ~9 min on RTX 5060 Ti
-  │                              eval loss: 3.54 → 1.69
-  ▼
-Merge + convert to GGUF       — llama.cpp b8967 (CPU build)
-  │                              F16 → q4_K_M quantization (7.9 GB → 2.6 GB)
-  ▼
-Ollama: podcast-specialist    — live inference
-  │
-  ▼
-FastAPI Chat UI :8660          — streaming, 5 demo chips, SSE events
-```
-
-**Key engineering decisions:**
-- Qwen3.5-4B tokenizer hash differs from 9B-Instruct — patched `convert_hf_to_gguf.py` with correct hash
-- Thinking mode causes infinite loops on Qwen3.5 — disabled via Modelfile template pre-fill + stop tokens
-- `collect_channel.py` bulk scraper — pull entire YouTube channel; dataset expandable to 20-30+ episodes
-
-**Stack:** Python · Unsloth · LoRA · llama.cpp · Ollama · FastAPI · Qwen3.5-4B
-
----
-
-## Other Builds
-
-| Project | Description | Stack | Status | Link |
-| :--- | :--- | :--- | :--- | :--- |
-| **n8n Lead Engine** | Autonomous B2B/RE/Reddit lead gen pipelines — scrape → qualify → Supabase. Daily cadence, runs unattended | n8n · Playwright · FastAPI · Supabase · Ollama | Live | — |
-| **LangGraph Lead Intelligence Agent** | Benchmarked against CrewAI (1,178s) and baseline (639s). Result: 5/5 leads in 128.5s with 4 tool calls | LangGraph · FastAPI · Playwright · Supabase | Built | — |
-| **Reddit Prospect Monitor** | 6 subreddits · commercial intent signals · AI pain point extraction → personalised outreach drafts in Supabase daily | Reddit API · n8n · Supabase | Live | — |
-| **AI Appointment Booking Agent** | CrewAI crew (Lead Scout, Qualifier, Booking Drafter) qualifies inbound leads and generates personalised booking messages. ~60s end-to-end | CrewAI · LangGraph · Calendly | Built | — |
-| **GEO / AI Citation Auditing** | Playwright query runner: 30 prompts across Perplexity + Google AI Overviews → structured gap report | Playwright · Python · Perplexity | Research | — |
-| **[Filo — AI Voice Receptionist](https://github.com/icporcincula/filo-pinoy-ai-receptionist)** | Fully local voice receptionist: browser mic → VAD → Faster-Whisper STT → Ollama LLM → Kokoro TTS. No cloud APIs | Go · Faster-Whisper · Ollama · Kokoro · Redis · Docker | Built | [GitHub](https://github.com/icporcincula/filo-pinoy-ai-receptionist) |
-| **[Sentinel-Extract](https://github.com/icporcincula/ai-document-analyzer)** | Air-gapped PII detection & document intelligence. Hybrid NER (Presidio + spaCy), local LLM reasoning, OCR-native ingestion | Python · Presidio · Ollama · FastAPI · Tesseract | Built | [GitHub](https://github.com/icporcincula/ai-document-analyzer) |
-| **[Vela](https://github.com/icporcincula/vela-pii-compliance)** | Compliance & audit layer sitting on top of [Eidolon](https://github.com/0M3REXE/eidolon) (Rust PII-redaction proxy) — async audit webhooks off the hot path, per-tenant rules, immutable audit log, compliance export | Go · React · SQLite · Docker | Built | [GitHub](https://github.com/icporcincula/vela-pii-compliance) |
-| **[Portfolio Recorder](https://github.com/icporcincula/portfolio-recorder)** | Playwright-based automated portfolio video pipeline: screen capture → narration → voice clone → ffmpeg render | Python · Playwright · Fish Speech · ffmpeg | Built | [GitHub](https://github.com/icporcincula/portfolio-recorder) |
+| Project | What it is | Stack |
+| :--- | :--- | :--- |
+| **[Sentinel-Extract](https://github.com/icporcincula/ai-document-analyzer)** | Air-gapped PII detection and document intelligence: hybrid NER (Presidio + spaCy), local LLM reasoning, OCR ingestion | Python · Presidio · Ollama · FastAPI · Tesseract |
+| **[Vela](https://github.com/icporcincula/vela-pii-compliance)** | Compliance and audit layer on top of the [Eidolon](https://github.com/0M3REXE/eidolon) PII-redaction proxy: async audit webhooks off the hot path, per-tenant rules, immutable audit log | Go · React · SQLite · Docker |
+| **[Filo](https://github.com/icporcincula/filo-pinoy-ai-receptionist)** | Fully local voice agent: VAD → Faster-Whisper → Ollama → Kokoro TTS, no cloud APIs | Go · Faster-Whisper · Ollama · Kokoro · Redis |
+| **Config-driven agent service** | One LangGraph ReAct service for many tenants: a new tenant is a config file, tools self-register, Redis session window + Qdrant memory | Python · FastAPI · LangGraph · Qdrant · Redis |
+| **Podcast specialist** | YouTube audio → 291-example dataset → Qwen3.5-4B LoRA (eval loss 3.54 → 1.69) → merged GGUF q4_K_M served on Ollama | Unsloth · LoRA · llama.cpp · Ollama |
+| **LangGraph vs CrewAI benchmark** | Same lead-research task on both frameworks: 128.5 s (LangGraph) against 1,178 s (CrewAI) | LangGraph · CrewAI · Playwright |
+| **Local UGC video pipeline** | LLM script → voice clone → diffusion lip-sync → ffmpeg, on one consumer GPU (Blackwell sm_120 build) | Ollama · Fish Speech · LatentSync · ffmpeg |
+| **Product-photo relighting** | SDXL img2img with per-preset denoise so product identity survives restyling | ComfyUI · SDXL · FastAPI |
 
 ---
 
 ## Background
 
-5 YOE across agentic systems, local ML infrastructure, and AI-driven automation. Roots in enterprise Java (Spring Boot) and SQL optimisation, then cloud-native Go/Python backends, now focused on end-to-end AI pipelines — from LLM fine-tuning and voice cloning to multi-agent orchestration, agentic web (WebMCP), and autonomous lead generation systems.
-
-Everything ships on private infrastructure: no cloud lock-in, no third-party data exposure, zero marginal cost at scale.
-
-📫 [porcincula.developer@gmail.com](mailto:porcincula.developer@gmail.com)
+5+ years of backend engineering. Senior Software Engineer at **Invensity GmbH** (2021–2026) on client work for German companies, including Robert Bosch GmbH: led an AI transcription and summarisation product end to end (Deepgram, custom Presidio PII models, PHP-to-Go migration, CI/CD), and built EU-compliant e-invoicing and whistleblower-reporting tools. GDPR-aware by habit.
