@@ -10,7 +10,7 @@ I build production agent systems and the evaluation tooling that shows whether a
 
 ## Now
 
-**Senior AI Engineer, TOA Global** (June 2026 – present). Building agents for a production multi-agent recruitment-workflow platform on Azure (TypeScript, Claude, Service Bus, Azure SQL, Cosmos DB). The platform is a finalist in the **Australian AI Awards 2026** (AI Innovator – Human Resources). That work is closed-source; the projects below are my own.
+**Senior AI Engineer, TOA Global** (June 2026 – present). Building agents for a production multi-agent recruitment-workflow platform on Azure (TypeScript, Claude, Service Bus, Azure SQL, Cosmos DB). That work is closed-source; the projects below are my own.
 
 ---
 
